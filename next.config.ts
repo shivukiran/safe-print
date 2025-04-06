@@ -4,7 +4,7 @@ import type { NextConfig } from "next";
 
 import path from 'path';
 
-require(path.resolve(__dirname, '../project0.2/app/utils/cron'));
+// require(path.resolve(__dirname, '../project0.2/app/utils/cron'));
 
 const nextConfig: NextConfig = {
   /* config options here */
