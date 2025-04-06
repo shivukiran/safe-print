@@ -9,6 +9,7 @@ import path from 'path';
 const nextConfig: NextConfig = {
   /* config options here */
   reactStrictMode: true,
+  output:"export",
   experimental: {
     serverActions: {
       bodySizeLimit: 5242880, // Example value in bytes (5mb)
