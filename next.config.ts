@@ -11,7 +11,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   experimental: {
     serverActions: {
-      bodySizeLimit: "1mb", // Example value
+      bodySizeLimit: 5242880, // Example value in bytes (5mb)
       allowedOrigins: ["*"], // Example value
     },
   },
