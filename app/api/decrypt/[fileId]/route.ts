@@ -64,16 +64,18 @@
 // }
 
 
-
 import { decrypt } from "../../../utils/encryption";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
 
 const prisma = new PrismaClient();
 
 export async function GET(req: NextRequest) {
   try {
     console.log("🔑 From download route");
+    console.log("📦 Route executed at:", new Date().toISOString());
 
     const fileId = req.nextUrl.pathname.split("/").pop();
     if (!fileId) {
@@ -88,8 +90,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "File not found" }, { status: 404 });
     }
 
-    if (!file.data) {
-      return NextResponse.json({ error: "File data is empty" }, { status: 500 });
+    if (!file.data || !(file.data instanceof Uint8Array)) {
+      return NextResponse.json({ error: "File data is empty or invalid" }, { status: 500 });
     }
 
     let decryptedData: Buffer;
@@ -102,7 +104,7 @@ export async function GET(req: NextRequest) {
     }
 
     let contentType = "application/octet-stream";
-    const ext = file.filename.split(".").pop()?.toLowerCase();
+    const ext = file.filename?.split(".").pop()?.toLowerCase() || "";
     switch (ext) {
       case "pdf":
         contentType = "application/pdf";
