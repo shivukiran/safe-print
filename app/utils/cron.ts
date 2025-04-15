@@ -3,12 +3,14 @@ import cron from 'node-cron';
 
 const prisma = new PrismaClient();
 
-// Function to delete expired files
-const localDate = new Date();
-const laptopDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
-console.log(laptopDate);
+// // Function to delete expired files
+// const localDate = new Date();
+// const laptopDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+// console.log(laptopDate);
 async function deleteExpiredFiles() {
     try {
+        const localDate = new Date();
+const laptopDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 10);
         const result = await prisma.file.deleteMany({
             where: {
                 expiresAt: { lte: laptopDate }, // Delete files where expiresAt <= now
@@ -21,11 +23,12 @@ async function deleteExpiredFiles() {
 }
 
 
-cron.schedule('0 0 * * * *', () => {
+cron.schedule('*/5 * * * * *', () => {
     console.log("Running cleanup job...");
     deleteExpiredFiles();
 });
 
 console.log("Cron job started: Checking for expired files every 5 minutes.");
+
 
 export default deleteExpiredFiles;

@@ -225,13 +225,13 @@
 // }
 
 
-
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 import { toast } from "./ui/use-toast";
 import { X, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "./InputOtp";
+import { z } from "zod";
 
 interface FetchFilesModalProps {
   onClose: () => void;
@@ -246,13 +246,16 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
   const [files, setFiles] = useState<{ id: string; filename: string }[]>([]);
   const [loading, setLoading] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(60);
+  const [timeLeft, setTimeLeft] = useState(300);
+  const [errors, setErrors] = useState<{ email?: string }>({});
+  const [printingFileId, setPrintingFileId] = useState<string | null>(null);
+
 
   const handleClose = useCallback(() => {
     setIsVisible(false);
     setTimeout(() => {
       onClose();
-    }, 60000);
+    }, 300); // Changed to 300ms for quicker modal close
   }, [onClose]);
 
   useEffect(() => {
@@ -265,10 +268,7 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
     };
 
     document.addEventListener("keydown", handleEscKey);
-
-    return () => {
-      document.removeEventListener("keydown", handleEscKey);
-    };
+    return () => document.removeEventListener("keydown", handleEscKey);
   }, [handleClose]);
 
   useEffect(() => {
@@ -295,50 +295,49 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
     return `${minutes}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
+  const emailSchema = z.object({
+    email: z.string().email("Please enter a valid email address"),
+  });
+
   const handleSendOTP = async () => {
-    if (!email) {
-      toast({
-        title: "Error",
-        description: "Please enter your email.",
-        variant: "destructive",
-      });
+    setErrors({});
+    try {
+      emailSchema.parse({ email });
+    } catch (error) {
+      const err = error as z.ZodError;
+      setErrors({ email: err.errors[0].message });
       return;
     }
 
     setLoading(true);
-
     try {
       const response = await axios.post("/api/send-otp", { email });
-
-      if (response.data.success) {
-        setOtpSent(true);
+      if (response.status === 200 && response.data.userId) {
+        setUserId(response.data.userId);
         toast({
-          title: "OTP Sent",
-          description: "Check your email for the verification code.",
+          title: "OTP Sent Successfully",
+          description: "Please check your email for the OTP.",
         });
-
-        if (response.data.userId) {
-          setUserId(response.data.userId);
-        }
+        setOtpSent(true);
+      }
+    } catch (error: any) {
+      if (error.response?.status === 404) {
+        toast({
+          title: "No User Found",
+          description: "The entered email is not registered with us.",
+          variant: "destructive",
+        });
       } else {
         toast({
-          title: "Error",
-          description: response.data.error || "Unexpected response from server.",
+          title: "Failed to Send OTP",
+          description: "Something went wrong. Please try again.",
           variant: "destructive",
         });
       }
-    } catch (error: any) {
-      console.error(error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.error || "Failed to send OTP.",
-        variant: "destructive",
-      });
     } finally {
       setLoading(false);
     }
   };
-
   const handleVerifyOTP = async () => {
     if (!otp || otp.length < 6) {
       toast({
@@ -350,45 +349,36 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
     }
 
     setLoading(true);
-
     try {
       const response = await axios.post("/api/verify-otp", { email, otp });
-
       if (response.data.success) {
-        setOtpVerified(true);
         toast({
           title: "Success",
           description: "OTP verified successfully!",
         });
-      } else {
-        toast({
-          title: "Error",
-          description: "Invalid OTP. Please try again.",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error(error);
+        setOtpVerified(true);
+      } 
+    } catch (error :any) {
+        if(error.response?.status === 404) {
+            toast({
+                title: "Invalid OTP",
+                description: "Please try again.",
+                variant: "destructive",
+              });
+        }
+else{
       toast({
-        title: "Error",
-        description: "Failed to verify OTP. Please try again.",
+        title: "Verification Failed",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
+    }
     } finally {
       setLoading(false);
     }
   };
 
   const fetchFiles = async (ownerId: string) => {
-    if (!ownerId) {
-      toast({
-        title: "Error",
-        description: "User ID not found. Please try again.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLoading(true);
     try {
       const res = await axios.get(`/api/files?ownerId=${ownerId}`);
@@ -404,28 +394,40 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
       setLoading(false);
     }
   };
-
   const printFile = async (fileId: string) => {
+    setPrintingFileId(fileId);
     try {
+      console.log(`🖨️ Printing file with ID: ${fileId}`);
+      toast({
+        title: "Printing...", 
+        description: "Printing your file !",
+      });
       const res = await axios.get(`/api/decrypt/${fileId}`, {
         responseType: "blob",
       });
+
+      console.log("✅ File download successful, preparing to print...");
+
       const blob = new Blob([res.data], { type: res.headers["content-type"] });
       const url = URL.createObjectURL(blob);
       const printWindow = window.open(url, "_blank");
 
       if (printWindow) {
         printWindow.onload = () => {
+          console.log("🖨️ Triggering print...");
           printWindow.print();
         };
       }
     } catch (error) {
-      console.error("Failed to print file:", error);
+      console.error("❌ Failed to print file:", error);
       toast({
         title: "Error",
         description: "Printing failed!",
-        variant: "destructive",
+        variant: "destructive"
       });
+    }
+    finally { 
+      setPrintingFileId(null);
     }
   };
 
@@ -441,11 +443,8 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center p-4 border-b">
-          <h2 className="text-lg font-semibold">Fetch Others&apos; Files</h2>
-          <button
-            onClick={handleClose}
-            className="text-gray-500 hover:text-gray-700 focus:outline-none"
-          >
+          <h2 className="text-lg font-semibold">Fetch Others' Files</h2>
+          <button onClick={handleClose} className="text-gray-500 hover:text-gray-700">
             <X size={20} />
           </button>
         </div>
@@ -454,8 +453,7 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
           {otpVerified && (
             <div className="mb-4 text-center">
               <p className="text-amber-600 font-medium">
-                Session expires in:{" "}
-                <span className="font-bold">{formatTime(timeLeft)}</span>
+                Session expires in: <span className="font-bold">{formatTime(timeLeft)}</span>
               </p>
             </div>
           )}
@@ -471,9 +469,13 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
                   type="email"
                   placeholder="your@email.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => {
+                    setEmail(e.target.value);
+                    setErrors({});
+                  }}
                   className="w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+                {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
               </div>
               <Button onClick={handleSendOTP} disabled={loading} className="w-full">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
@@ -487,25 +489,14 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
               <p className="text-gray-600 text-center">
                 Enter the verification code sent to <span className="font-medium">{email}</span>
               </p>
-
               <div className="flex justify-center">
                 <InputOTP maxLength={6} value={otp} onChange={setOtp}>
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
+                    {[0, 1, 2, 3, 4, 5].map((i) => <InputOTPSlot key={i} index={i} />)}
                   </InputOTPGroup>
                 </InputOTP>
               </div>
-
-              <Button
-                onClick={handleVerifyOTP}
-                disabled={loading || otp.length !== 6}
-                className="w-full"
-              >
+              <Button onClick={handleVerifyOTP} disabled={loading || otp.length !== 6} className="w-full">
                 {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 {loading ? "Verifying..." : "Verify Code"}
               </Button>
@@ -532,10 +523,18 @@ const FetchFilesModal = ({ onClose }: FetchFilesModalProps) => {
                         variant="outline"
                         size="sm"
                         onClick={() => printFile(file.id)}
-                        className="flex items-center"
+                        disabled={printingFileId === file.id}
+                        className="flex items-center gap-2"
                       >
-                        Print
+                        {printingFileId === file.id ? (
+                          <>
+                            <Loader2 className="animate-spin border-2 border-t-transparent border-blue-600 rounded-full w-5 h-5 inline-block" />
+                          </>
+                        ) : (
+                          "Print"
+                        )}
                       </Button>
+
                     </div>
                   ))}
                 </div>

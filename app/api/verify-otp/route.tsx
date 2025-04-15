@@ -32,7 +32,7 @@ export async function POST(req: Request) {
       console.error("Invalid OTP");
       return NextResponse.json(
         { error: "Invalid OTP" },
-        { status: 400 }
+        { status: 404 }
       );
     }
   } catch (error: unknown) {

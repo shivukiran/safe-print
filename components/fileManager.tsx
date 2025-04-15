@@ -1,14 +1,24 @@
 
 
-import { useState, useEffect , useCallback } from "react";
+import React, { useState, useEffect , useCallback } from "react";
 import axios from "axios";
 import { toast } from "./ui/use-toast";
 import Sidebar from "./SideBar";
 import FileUpload from "./FileUpload";
 import FileCard from "./FileCard";
-// import MenuButton from "./MenuButton";
+import MenuButton from "./MenuButton";
 import FetchFilesModal from "./fetchFiles";
 import { Search } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+import { Bodoni_Moda_SC, Limelight
+} from 'next/font/google';
+
+const barriecito = Bodoni_Moda_SC
+({
+  weight: '400',
+  subsets: ['latin'],
+});
 
 interface FileManagerDashboardProps {
   userId: string | undefined;
@@ -25,6 +35,10 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
   const [isFetchOpen, setFetchOpen] = useState(false);
   const [isName, setName] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [viewingFileId, setViewingFileId] = useState<string | null>(null);
+const [printingFileId, setPrintingFileId] = useState<string | null>(null);
+const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
+
 
 
   const fetchFiles = useCallback(async () => {
@@ -107,10 +121,15 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
     setLoadingUpload(true);
     try {
 
+      toast({
+        title: "Encrypting...", 
+        description: "Encrypting your file !",
+      });
+      
       await axios.post("/api/upload", formData);
       
       toast({
-        title: "Success",
+        title: "Success ",
         description: "File uploaded successfully!",
       });
       
@@ -132,8 +151,14 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
 
 
   const deleteFile = async (fileId: string) => {
-    try {
 
+    setDeletingFileId(fileId);
+    try {
+      toast({
+        title: "Deleting...",
+        description: "File is being deleted!",
+      });
+      
       const res = await fetch("/api/delete", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
@@ -162,6 +187,9 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
         description: "Failed to delete file!",
         variant: "destructive"
       });
+    }
+    finally {
+      setDeletingFileId(null);
     }
   };
 
@@ -223,8 +251,14 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
       });
       return;
     }
+    setViewingFileId(fileId);
 
     try {
+
+      toast({
+        title: "Decrypting...", 
+        description: "Viewing your file !",
+      });
       const res = await axios.get(`/api/decrypt/${fileId}`, {
         responseType: "blob",
       });
@@ -245,12 +279,19 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
         variant: "destructive"
       });
     }
+    finally {
+      setViewingFileId(null);
+    }
   };
 
   const printFile = async (fileId: string) => {
+    setPrintingFileId(fileId);
     try {
       console.log(`🖨️ Printing file with ID: ${fileId}`);
-
+      toast({
+        title: "Decrypting...", 
+        description: "Printing your file !",
+      });
       const res = await axios.get(`/api/decrypt/${fileId}`, {
         responseType: "blob",
       });
@@ -275,6 +316,9 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
         variant: "destructive"
       });
     }
+    finally { 
+      setPrintingFileId(null);
+    }
   };
 
   // Filter files based on search query
@@ -283,69 +327,58 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
   );
 
   return (
-<div className="flex h-screen bg-gray-200 overflow-hidden">
-  {/* Sidebar */}
-  <div
-    className={`
-      ${sidebarCollapsed ? "w-0 md:w-0" : "w-50"}
-      transition-all duration-300 ease-in-out
-      bg-white border-r border-gray-200
-      fixed md:relative z-20 h-full
-    `}
-  >
-    <Sidebar
-      userName={isName || userName}
-      userId={userId}
-      isCollapsed={sidebarCollapsed}
-      toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
-      onFetchFilesOpen={() => setFetchOpen(true)}
-      onDeleteAllFiles={deleteAllFiles}
-      loadingDelete={loadingDelete}
-    />
-  </div>
-
-  {/* Main Content */}
-  <div
-    className={`
-      flex-1 flex flex-col transition-all duration-300 ease-in-out
-      ${sidebarCollapsed ? "md:ml-40" : "md:ml-10"} ml-0
-    `}
-  >
-    {/* Mobile Header */}
-    {/* <header className="bg-white border-b border-gray-200 p-4 flex md:hidden items-center justify-between shadow-sm z-10">} */}
-      {/* <div className="flex items-center">
-        <MenuButton
-          isOpen={!sidebarCollapsed}
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+    <div className="flex h-screen bg-[#E0EAFF] overflow-hidden">
+      {/* Sidebar */}
+      <div
+        className={`
+          ${sidebarCollapsed ? "w-0 md:w-0" : "w-40 md:w-60"}
+          transition-all duration-500 ease-in-out
+          fixed md:relative z-20 h-full
+        `}
+      >
+        <Sidebar
+          userName={isName || userName}
+          userId={userId}
+          isCollapsed={sidebarCollapsed}
+          toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
+          onFetchFilesOpen={() => setFetchOpen(true)}
+          onDeleteAllFiles={deleteAllFiles}
+          loadingDelete={loadingDelete}
         />
-        <h1 className="ml-4 text-xl font-semibold">File Space</h1>
-      </div> */}
-    {/* </header> */}
+      </div>
+  
+      {/* Main Content */}
+      <div
+        className={`
+          flex-1 flex flex-col transition-all duration-500 ease-in-out
+          ${sidebarCollapsed ? "md:ml-40" : "md:ml-10"} ml-0
+        `}
+      >
         {/* Content */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="max-w-5xl mx-auto">
+        <main className="flex-1 overflow-y-auto p-6 pt-20">
+          <div className="max-w-5xl mx-auto border border-gray-300 px-20 py-20  bg-white  rounded-lg shadow-md">
             <div className="flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold text-gray-800">My Files</h1>
+              <h1 className={`text-2xl font-bold text-gray-800 ${barriecito.className} text-center`}>My Files</h1>
               <div className="relative">
                 <input
                   type="text"
                   placeholder="Search files..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="pl-10 pr-4 py-2 border bg-[#E0EAFF] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-sans"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
                 <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
               </div>
             </div>
-            
-            <FileUpload 
+  
+            <FileUpload
               onFileSelect={handleFileChange}
               onUpload={handleUpload}
               isUploading={loadingUpload}
             />
-            
+  
             <div>
-              <h2 className="text-xl font-semibold mb-4">Uploaded Files</h2>
+              <h2 className={`text-xl font-semibold mb-4 ${barriecito.className}`}>Uploaded Files</h2>
               {loading ? (
                 <div className="text-center py-10">
                   <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4"></div>
@@ -360,27 +393,32 @@ const FileManagerDashboard = ({ userId, userName }: FileManagerDashboardProps) =
                       onView={viewFile}
                       onDelete={deleteFile}
                       onPrint={printFile}
+                      isViewing={viewingFileId === file.id}
+                      isPrinting={printingFileId === file.id}
+                      isDeleting={deletingFileId === file.id}
                     />
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-10 bg-white rounded-lg border border-gray-200">
                   <div className="text-6xl mb-4">📁</div>
-                  <h3 className="text-lg font-medium mb-2">No files found</h3>
-                  <p className="text-gray-500">
-                    {searchQuery ? "No files match your search" : "Upload your first file to get started"}
+                  <h3 className={`text-lg font-medium mb-2 ${barriecito.className}`}>No files found</h3>
+                  <p className={`text-gray-500 ${barriecito.className}`} >
+                    {searchQuery
+                      ? "No files match your search"
+                      : "Upload your first file to get started"}
                   </p>
                 </div>
               )}
             </div>
           </div>
         </main>
+  
+        {/* Fetch Files Modal */}
+        {isFetchOpen && <FetchFilesModal onClose={() => setFetchOpen(false)} />}
       </div>
-
-      {/* Fetch Files Modal */}
-      {isFetchOpen && <FetchFilesModal onClose={() => setFetchOpen(false)} />}
     </div>
   );
-};
+}
 
 export default FileManagerDashboard;

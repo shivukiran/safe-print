@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     const laptopDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
     // console.log(laptopDate);
 
-    const expiresAt = new Date(laptopDate.getTime() + 60 * 60 * 1000); // Set expiration to 1 minute
+    const expiresAt = new Date(laptopDate.getTime() + 60 * 60 * 1000); // Set expiration to 1 hour
     await prisma.file.create({
       data: {
         filename: file.name,

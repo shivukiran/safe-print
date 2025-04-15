@@ -92,7 +92,7 @@ export default function SignIn() {
   return (
     <div className="flex h-screen">
       {/* Left Section */}
-      <div className="w-1/2 flex justify-center items-center bg-white p-8">
+      <div className="w-1/2 flex justify-center items-center bg-[#E0EAFF]  p-8">
         <div className="w-full max-w-sm">
           <h2 className="text-3xl font-bold text-center">Login</h2>
           <p className="text-gray-600 text-center mb-6">

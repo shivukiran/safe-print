@@ -47,7 +47,7 @@ export default function Signup() {
       if (result?.ok) {
         router.push("/dashboard");
         toast({
-          title: "Welcome!",
+          title: `Welcome! ${name}`,
           description: "Account created successfully. Redirecting to dashboard...",
         });
       } else {
@@ -88,7 +88,7 @@ export default function Signup() {
   return (
     <div className="flex h-screen">
       {/* Left - Form Section */}
-      <div className="w-1/2 flex justify-center items-center bg-white p-8">
+      <div className="w-1/2 flex justify-center items-center bg-[#E0EAFF]  p-8">
         <div className="w-full max-w-sm">
           <h2 className="text-3xl font-bold text-center">Sign Up</h2>
           <p className="text-gray-600 text-center mb-6">
