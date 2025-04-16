@@ -3,13 +3,13 @@ import { Toaster } from "sonner"; // ✅ CORRECT: Import from 'sonner'
 import "./globals.css";
 
 export const metadata = {
-  title: "Print Safe App",
+  title: "Safe Scribe ",
   description: "Secure file printing application",
   icons: {
     icon: [
       {
-        url: "/logo.png",
-        href: "/logo.png",
+        url: "/logo3.png",
+        href: "/logo3.png",
       },
     ],
   },

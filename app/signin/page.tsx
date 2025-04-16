@@ -129,11 +129,11 @@ export default function SignIn() {
             {loading ? "Signing In..." : "Sign In"}
           </button>
 
-          <p className="mt-3 text-center text-sm text-gray-600">
+          <p className="mt-3 text-center text-sm text-gray-600 ">
             Forgot Password?{" "}
             <button
               onClick={() => setForgotPasswordOpen(true)}
-              className="text-blue-500 underline"
+              className="text-blue-500 underline cursor-pointer" 
             >
               Click Here
             </button>

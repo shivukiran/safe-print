@@ -1,7 +1,14 @@
 import { useState } from "react";
 import { Upload } from "lucide-react";
 import { cn } from "../app/lib/utils";
+import { Bodoni_Moda_SC, Limelight
+} from 'next/font/google';
 
+const barriecito = Bodoni_Moda_SC
+({
+  weight: '400',
+  subsets: ['latin'],
+});
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
   onUpload: () => void;
@@ -52,10 +59,10 @@ const FileUpload = ({ onFileSelect, onUpload, isUploading }: FileUploadProps) =>
         <label htmlFor="fileInput" className="cursor-pointer">
           <div className="flex flex-col items-center">
             <Upload size={40} className="text-blue-500 mb-2" />
-            <p className="text-sm font-medium">
+            <p className={`text-sm font-medium  ${barriecito.className}`}>
               {selectedFile || "Drag & drop a file here, or click to select"}
             </p>
-            <p className="text-xs text-gray-500 mt-1">Supports all file types</p>
+            <p className={`text-xs text-gray-500 mt-1  ${barriecito.className}`}>Supports all file types</p>
           </div>
         </label>
       </div>
@@ -69,7 +76,9 @@ const FileUpload = ({ onFileSelect, onUpload, isUploading }: FileUploadProps) =>
         : "bg-gray-400 cursor-not-allowed"
       )}
     >
+                <span className={`ml-2 ${barriecito.className}`}>
       {isUploading ? "Uploading..." : "Upload File"}
+    </span>
     </button>
     </div>
   );

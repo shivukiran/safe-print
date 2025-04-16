@@ -76,7 +76,7 @@ app.prepare().then(() => {
   // 🔧 Middleware for JSON parsing
   server.use(express.json());
 
-  // Run deleteExpiredFiles immediately when the app starts
+  // Run deleteExpiredFiles immediately when the app starts '*/5 * * * * *', 
   deleteExpiredFiles().then(() => {
     console.log("✅ Expired files deletion completed at startup!");
   }).catch((error) => {

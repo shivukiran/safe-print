@@ -123,7 +123,7 @@ const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
 
       toast({
         title: "Encrypting...", 
-        description: "Encrypting your file !",
+        description: "Uploading your file !",
       });
       
       await axios.post("/api/upload", formData);
@@ -363,7 +363,7 @@ const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
                 <input
                   type="text"
                   placeholder="Search files..."
-                  className="pl-10 pr-4 py-2 border bg-[#E0EAFF] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-sans"
+                  className={`pl-10 pr-4 py-2 border bg-[#E0EAFF] rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500  ${barriecito.className}`}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                 />
