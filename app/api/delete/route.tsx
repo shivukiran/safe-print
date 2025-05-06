@@ -18,12 +18,12 @@ export async function DELETE(req: Request) {
         const filePath = path.join(process.cwd(), "uploads", fileId);
         if (fs.existsSync(filePath)) {
             fs.unlinkSync(filePath);
-            console.log(`✅ File ${fileId} deleted from storage`);
+            console.log(`File ${fileId} deleted from storage`);
         }
 
         return NextResponse.json({ success: true });
     } catch (error) {
-        console.error("❌ Server Error:", error);
+        console.error("Server Error:", error);
         return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
     }
 }

@@ -3,13 +3,17 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "../app/lib/utils";
-import { Home, Upload, FileText, LogOut, Menu, ChevronLeft } from "lucide-react";
+import { Home, Upload, FileText, LogOut, Menu, ChevronLeft ,Info} from "lucide-react";
 import UserAvatar from "./UserAvatar";
 import { signOut } from "next-auth/react";
 
-
+// import {about} from "next-auth/react";
+// import AboutUs from "../app/about";
 import { Bodoni_Moda_SC, Gloria_Hallelujah
 } from 'next/font/google';
+import { Label } from "@radix-ui/react-dropdown-menu";
+
+
 
 const barriecito = Bodoni_Moda_SC 
 ({
@@ -26,19 +30,27 @@ interface SidebarProps {
   userName?: string;
   userId?: string;
   isCollapsed: boolean;
+  // onAboutUsOpen: () => void;
   toggleSidebar: () => void;
   onFetchFilesOpen: () => void;
   onDeleteAllFiles: (userId: string) => Promise<void>;
   loadingDelete: boolean;
+  
 }
 
 const navItems = [
   { label: "Dashboard", icon: Home, href: "/dashboard" },
 ];
 
+const navItems2 = [
+  {label :"About Us", icon:Info , href: "/about"},
+];
+
 const handleSignOut = async () => {
   await signOut({ redirect: true, callbackUrl: "/signin" });
 };
+
+
 
 const Sidebar = ({
   userName,
@@ -47,6 +59,7 @@ const Sidebar = ({
   toggleSidebar,
   onFetchFilesOpen,
   onDeleteAllFiles,
+  // onAboutUsOpen,
   loadingDelete,
 }: SidebarProps) => {
   const pathname = usePathname();
@@ -158,6 +171,49 @@ const Sidebar = ({
                 </span>
               )}
             </button>
+
+            {navItems2.map(({ label, icon: Icon, href }) => {
+            const isActive = pathname === href;
+            return (
+              <Link
+                key={label}
+                href={href}
+                className={cn(
+                  "flex items-center space-x-3 p-3 rounded-lg mx-1 transition-all group",
+                  isActive
+                    ? "bg-blue-500/20 text-blue-400 font-medium shadow-md"
+                    : "text-gray-300 hover:bg-gray-700/50 hover:text-white"
+                )}
+              >
+                <div className={cn(
+                  "p-2 rounded-lg",
+                  isActive 
+                    ? "bg-blue-500/10" 
+                    : "bg-gray-700/30 group-hover:bg-gray-600/50"
+                )}>
+                  <Icon className="w-5 h-5" />
+                </div>
+                {!isCollapsed && <span className={`flex-1 ${barriecito.className}`}>{label}</span>}
+                {!isCollapsed && isActive && (
+                  <div className="w-2 h-2 rounded-full bg-blue-400 animate-pulse " />
+                )}
+              </Link>
+            );
+          })}
+
+            {/* <button
+              onClick={handleAboutUs}
+              className={cn(
+                "flex items-center w-full p-3 rounded-lg transition-all group",
+                "bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 hover:text-amber-300",
+                "transform hover:translate-x-1 cursor-pointer"
+              )}
+            >
+              <div className="p-2 rounded-lg bg-amber-500/20 group-hover:bg-amber-500/30 cursor-pointer ">
+                <Upload className="w-5 h-5" />
+              </div>
+              {!isCollapsed && <span className={`ml-2 ${barriecito.className}`}>About Us</span>}
+            </button> */}
           </div>
         </nav>
 
@@ -266,6 +322,25 @@ const Sidebar = ({
         <FileText className="w-5 h-5 mr-2" />
         <span className={`px-2 py-1  ${barriecito.className}`}>Delete All Files</span>
       </button>
+
+      {navItems2.map(({ label, icon: Icon, href }) => {
+        const isActive = pathname === href;
+        return (
+          <Link
+            key={label}
+            href={href}
+            className={cn(
+              "flex items-center px-4 py-2 rounded-md",
+              isActive
+                ? "text-blue-300 bg-transparent"
+                : "text-gray-300 hover:text-white"
+            )}
+          >
+            <Icon className="w-5 h-5 mr-2" />
+            <span className={`px-2 py-1  ${barriecito.className}`}>{label}</span>
+          </Link>
+        );
+      })}
     </nav>
   </div>
       </header>

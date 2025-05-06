@@ -1,6 +1,6 @@
 
 
-import {  encrypt } from "../../utils/encryption";
+import {  decrypt, encrypt } from "../../utils/encryption";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -25,6 +25,8 @@ export async function POST(req: Request) {
     // console.log("Before Encrypted data:", fileBuffer);
     // console.log("Encrypted data:", encryptedBuffer);
     // console.log("Decrypted data:", decrypt(encryptedBuffer));
+
+
     const localDate = new Date();
     const laptopDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
     // console.log(laptopDate);

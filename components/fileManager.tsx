@@ -10,7 +10,7 @@ import MenuButton from "./MenuButton";
 import FetchFilesModal from "./fetchFiles";
 import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
+// import{AboutPage} from "./aboutUs";
 import { Bodoni_Moda_SC, Limelight
 } from 'next/font/google';
 
@@ -343,7 +343,9 @@ const [deletingFileId, setDeletingFileId] = useState<string | null>(null);
           toggleSidebar={() => setSidebarCollapsed(!sidebarCollapsed)}
           onFetchFilesOpen={() => setFetchOpen(true)}
           onDeleteAllFiles={deleteAllFiles}
+          // onAboutUsOpen={AboutPage}
           loadingDelete={loadingDelete}
+
         />
       </div>
   

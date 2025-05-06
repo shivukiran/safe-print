@@ -3,7 +3,7 @@ import { Toaster } from "sonner"; // ✅ CORRECT: Import from 'sonner'
 import "./globals.css";
 
 export const metadata = {
-  title: "Safe Scribe ",
+  title: "Safe Xcribe ",
   description: "Secure file printing application",
   icons: {
     icon: [

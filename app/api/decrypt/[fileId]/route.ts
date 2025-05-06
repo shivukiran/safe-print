@@ -99,7 +99,7 @@ export async function GET(req: NextRequest) {
     try {
       decryptedData = decrypt(Buffer.from(file.data));
     } catch (e) {
-      console.error("❌ Error during decryption:", e);
+      console.error("Error during decryption:", e);
       return NextResponse.json({ error: "Failed to decrypt file" }, { status: 500 });
     }
 
@@ -128,7 +128,7 @@ export async function GET(req: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("❌ Unhandled error:", error);
+    console.error("Unhandled error:", error);
     return NextResponse.json({ error: "Unexpected server error" }, { status: 500 });
   }
 }
